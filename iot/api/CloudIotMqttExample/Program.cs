@@ -162,8 +162,13 @@ namespace GoogleCloudSamples
         // [START iot_create_auth_client]
         public static CloudIotService CreateAuthorizedClient()
         {
-            GoogleCredential credential =
-                GoogleCredential.GetApplicationDefaultAsync().Result;
+
+            string svcacccred = "/Users/thina/Development/gcpserviceaccount/ivdiot-c47f2b4d2ebd.json";
+            GoogleCredential credential = GoogleCredential.FromFileAsync(svcacccred, new System.Threading.CancellationToken()).Result;
+            // GoogleCredential.GetApplicationDefaultAsync().Result;
+
+
+
             // Inject the Cloud IoT Core Service scope
             if (credential.IsCreateScopedRequired)
             {
@@ -429,6 +434,11 @@ namespace GoogleCloudSamples
                         retryIntervalMs = maxConnectIntervalMillis;
                     }
                 }
+                catch (uPLibrary.Networking.M2Mqtt.Exceptions.MqttCommunicationException mqttComException )
+                {
+                    Console.WriteLine(mqttComException.Message);
+                }
+
             }
 
             // Publish number of messages and wait for given seconds.
@@ -757,5 +767,60 @@ namespace GoogleCloudSamples
                 .NotParsedFunc = (err) => 1;
             return (int)verbMap.Run(args);
         }
+
+        /*public static int Main(string[] args)
+        {
+            //Start Mqtt
+            MqttExampleOptions opts = new MqttExampleOptions()
+            {
+                projectId = "ivdiot",
+
+
+                //[Value(1, HelpText = "The region (e.g. us-central1) the registry is located in.", Required = true)]
+                regionId = "us-central1",
+
+                //[Value(2, HelpText = "The ID of the registry to create.", Required = true)]
+                registryId = "IvDIOT_Device_Registry",
+
+                //[Value(3, HelpText = "Cloud IoT Core device id.", Required = true)]
+                deviceId = "thina_m1_device",
+
+                //[Value(4, HelpText = "Path to private key file.", Required = true)]
+                private_key_file = "test/data/rsa_private.pem",
+
+                //[Value(5, HelpText = "Encryption algorithm to use to generate the JWT. Either 'RS256' or 'ES256'.", Required = true)]
+                algorithm = "RS256",
+
+                //[Value(6, HelpText = "CA root from https://pki.google.com/roots.pem.", Required = true)]
+                caCert = "test/data/roots.pem",
+
+                //[Value(7, HelpText = "Indicates whether the message to be published is a telemetry event or a device state message.", Required = true)]
+                messageType = "events",
+
+                //[Option(HelpText = "MQTT bridge hostname.", Default = "mqtt.googleapis.com")]
+                mqttBridgeHostname = "mqtt.googleapis.com",
+
+                //[Option(HelpText = "MQTT bridge port.", Default = 443)]
+                mqttBridgePort = 443,
+
+                //[Option(HelpText = "Expiration time, in minutes, for JWT tokens.", Default = 60)]
+                jwtExpiresMinutes = 60,
+
+                //[Option(HelpText = "Number of messages to publish.", Default = 20)]
+                numMessages = 1,
+
+                //[Option(HelpText = "Wait time (in seconds) for commands.", Default = 120)]
+                waitTime = 120
+            };
+
+            StartMqtt(
+                    opts.projectId, opts.regionId, opts.registryId,
+                    opts.deviceId, opts.private_key_file, opts.algorithm,
+                    opts.caCert, opts.numMessages, opts.messageType,
+                    opts.mqttBridgeHostname, opts.mqttBridgePort,
+                    opts.jwtExpiresMinutes, opts.waitTime);
+            return 0;
+        }*/
+
     }
 }

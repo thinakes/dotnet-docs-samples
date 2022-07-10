@@ -338,6 +338,8 @@ namespace GoogleCloudSamples
 
         public IotTestFixture()
         {
+            /*
+
             RegionId = "us-central1";
             ProjectId = Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
             ServiceAccount = "serviceAccount:cloud-iot@system.gserviceaccount.com";
@@ -358,6 +360,30 @@ namespace GoogleCloudSamples
             CheckRegistriesLimit(ProjectId, RegionId);
             Assert.Equal(0, Run("createRegistry", ProjectId, RegionId,
                 RegistryId, TopicName.TopicId).ExitCode);
+
+            */
+
+
+            RegionId = "us-central1";
+            ProjectId = "ivdiot"; // Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
+            string privateKeyPath = "test/data/rsa_private.pem";// Environment.GetEnvironmentVariable("IOT_PRIVATE_KEY_PATH");
+            if (privateKeyPath.Length == 0 || !File.Exists(privateKeyPath))
+            {
+                throw new NullReferenceException("Private key path is not for unit tests.");
+            }
+            CertPath = "test/data/roots.pem"; // Environment.GetEnvironmentVariable("IOT_CERT_KEY_PATH");
+            PrivateKeyPath = privateKeyPath;
+            ServiceAccount = "serviceAccount:ivdiot-service-account@ivdiot.iam.gserviceaccount.com"; //"ivdiot-service-account@ivdiot.iam.gserviceaccount.com";
+            TestId = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+            TopicName = new TopicName(ProjectId, "iot-test-" + TestId);
+            RegistryId = "iot-test-" + TestId;
+            CreatePubSubTopic(this.TopicName);
+            // Check if the number of registries does not exceed 90.
+            CheckRegistriesLimit(ProjectId, RegionId);
+            Assert.Equal(0, CloudIotSample.CreateRegistry(ProjectId, RegionId,
+                RegistryId, TopicName.TopicId));
+
+
         }
 
         public void CheckRegistriesLimit(string projectId, string regionId)

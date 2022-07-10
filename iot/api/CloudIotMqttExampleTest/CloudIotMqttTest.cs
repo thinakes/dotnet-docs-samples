@@ -211,16 +211,60 @@ namespace GoogleCloudSamples
         public string CertPath { get; private set; }
         public IotTestFixture()
         {
+            /*
+                projectId = "IvDIOT",
+
+                //[Value(1, HelpText = "The region (e.g. us-central1) the registry is located in.", Required = true)]
+                regionId = "us-central1",
+
+                //[Value(2, HelpText = "The ID of the registry to create.", Required = true)]
+                registryId = "IvDIOT_Device_Registry",
+
+                //[Value(3, HelpText = "Cloud IoT Core device id.", Required = true)]
+                deviceId = "thina_m1_device",
+
+                //[Value(4, HelpText = "Path to private key file.", Required = true)]
+                private_key_file = "rsa_private.pem",
+
+                //[Value(5, HelpText = "Encryption algorithm to use to generate the JWT. Either 'RS256' or 'ES256'.", Required = true)]
+                algorithm = "RS256",
+
+                //[Value(6, HelpText = "CA root from https://pki.google.com/roots.pem.", Required = true)]
+                caCert = "roots.pem",
+
+                //[Value(7, HelpText = "Indicates whether the message to be published is a telemetry event or a device state message.", Required = true)]
+                messageType = "events",
+
+                //[Option(HelpText = "MQTT bridge hostname.", Default = "mqtt.googleapis.com")]
+                mqttBridgeHostname = "mqtt.googleapis.com",
+
+                //[Option(HelpText = "MQTT bridge port.", Default = 443)]
+                mqttBridgePort = 443,
+
+                //[Option(HelpText = "Expiration time, in minutes, for JWT tokens.", Default = 60)]
+                jwtExpiresMinutes = 60,
+
+                //[Option(HelpText = "Number of messages to publish.", Default = 20)]
+                numMessages = 1,
+
+                //[Option(HelpText = "Wait time (in seconds) for commands.", Default = 120)]
+                waitTime = 120
+
+                */
+
+
             RegionId = "us-central1";
-            ProjectId = Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
-            string privateKeyPath = Environment.GetEnvironmentVariable("IOT_PRIVATE_KEY_PATH");
+            ProjectId = "ivdiot"; // Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
+            //string currentDir = Directory.GetCurrentDirectory();
+            //currentDir = currentDir + @"/test/data/";
+            string privateKeyPath = @"test/data/rsa_private.pem";// Environment.GetEnvironmentVariable("IOT_PRIVATE_KEY_PATH");
             if (privateKeyPath.Length == 0 || !File.Exists(privateKeyPath))
             {
                 throw new NullReferenceException("Private key path is not for unit tests.");
             }
-            CertPath = Environment.GetEnvironmentVariable("IOT_CERT_KEY_PATH");
+            CertPath = @"test/data/roots.pem"; // Environment.GetEnvironmentVariable("IOT_CERT_KEY_PATH");
             PrivateKeyPath = privateKeyPath;
-            ServiceAccount = "serviceAccount:cloud-iot@system.gserviceaccount.com";
+            ServiceAccount = "serviceAccount:ivdiot-service-account@ivdiot.iam.gserviceaccount.com"; //"ivdiot-service-account@ivdiot.iam.gserviceaccount.com";
             TestId = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString();
             TopicName = new TopicName(ProjectId, "iot-test-" + TestId);
             RegistryId = "iot-test-" + TestId;
@@ -229,6 +273,8 @@ namespace GoogleCloudSamples
             CheckRegistriesLimit(ProjectId, RegionId);
             Assert.Equal(0, CloudIotSample.CreateRegistry(ProjectId, RegionId,
                 RegistryId, TopicName.TopicId));
+
+
         }
         public void CheckRegistriesLimit(string projectId, string regionId)
         {
@@ -254,6 +300,9 @@ namespace GoogleCloudSamples
         }
         public void CreatePubSubTopic(TopicName topicName)
         {
+            string svcacccred = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+
+
             var publisher = PublisherServiceApiClient.Create();
 
             try

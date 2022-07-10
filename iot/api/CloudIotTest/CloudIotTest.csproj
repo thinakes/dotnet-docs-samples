@@ -11,6 +11,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CloudIotSample\CloudIotSample.csproj" />
@@ -25,5 +26,8 @@
       <Link>test\data\rsa_cert.pem</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Google.Cloud.Storage.V1" />
   </ItemGroup>
 </Project>
