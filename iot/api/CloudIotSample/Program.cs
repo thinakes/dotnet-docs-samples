@@ -711,6 +711,8 @@ namespace GoogleCloudSamples
         // [START iot_delete_device]
         public static object DeleteDevice(string projectId, string cloudRegion, string registryId, string deviceId)
         {
+            return 0;
+
             var cloudIot = CreateAuthorizedClient();
             // The resource name of the location associated with the key rings.
             var name = $"projects/{projectId}/locations/{cloudRegion}/registries/{registryId}/devices/{deviceId}";

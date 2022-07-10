@@ -23,13 +23,14 @@ using Xunit.Abstractions;
 using Binding = Google.Cloud.Iam.V1.Binding;
 using Policy = Google.Cloud.Iam.V1.Policy;
 using SetIamPolicyRequest = Google.Cloud.Iam.V1.SetIamPolicyRequest;
+using GoogleCloudSamples;
 
-namespace GoogleCloudSamples
+namespace ImmucorMqttTests
 {
     // <summary>
     /// Runs the sample app's methods and tests the outputs
     // </summary>
-    public class CommonTests : IClassFixture<IotTestFixture>
+    public class ImmucorMqttCommonTests : IClassFixture<IotTestFixture>
     {
         private readonly RetryRobot _retryRobot = new RetryRobot()
         {
@@ -38,7 +39,7 @@ namespace GoogleCloudSamples
         private readonly IotTestFixture _fixture;
         private readonly ITestOutputHelper _output;
 
-        public CommonTests(IotTestFixture fixture, ITestOutputHelper helper)
+        public ImmucorMqttCommonTests(IotTestFixture fixture, ITestOutputHelper helper)
         {
             _fixture = fixture;
             //for displaying unit tests output in the console.
@@ -53,7 +54,7 @@ namespace GoogleCloudSamples
         [Fact]
         public void TestMqttDeviceEvents()
         {
-            var deviceId = "rsa-device-mqttconfig-" + _fixture.TestId;
+            var deviceId = "rsa-device-mqttconfig-" + _fixture.DeviceUniqueId;
 
             //Setup scenario
             CloudIotSample.CreateRsaDevice(_fixture.ProjectId, _fixture.RegionId, _fixture.RegistryId, deviceId, "test/data/rsa_cert.pem");
@@ -90,7 +91,7 @@ namespace GoogleCloudSamples
         [Fact]
         public void TestMqttDeviceState()
         {
-            var deviceId = "rsa-device-mqtt-state-" + _fixture.TestId;
+            var deviceId = "rsa-device-mqtt-state-" + _fixture.DeviceUniqueId;
             try
             {
                 //Setup screnario
@@ -200,7 +201,7 @@ namespace GoogleCloudSamples
         public TopicName TopicName { get; private set; }
         public string RegistryId { get; private set; }
 
-        public string TestId { get; private set; }
+        public string DeviceUniqueId { get; private set; }
 
         public string ProjectId { get; private set; }
         public string ServiceAccount { get; private set; }
@@ -252,27 +253,31 @@ namespace GoogleCloudSamples
 
                 */
 
-
             RegionId = "us-central1";
             ProjectId = "ivdiot"; // Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
-            //string currentDir = Directory.GetCurrentDirectory();
-            //currentDir = currentDir + @"/test/data/";
-            string privateKeyPath = @"test/data/rsa_private.pem";// Environment.GetEnvironmentVariable("IOT_PRIVATE_KEY_PATH");
+            string privateKeyPath = "test/data/rsa_private.pem";// Environment.GetEnvironmentVariable("IOT_PRIVATE_KEY_PATH");
             if (privateKeyPath.Length == 0 || !File.Exists(privateKeyPath))
             {
                 throw new NullReferenceException("Private key path is not for unit tests.");
             }
-            CertPath = @"test/data/roots.pem"; // Environment.GetEnvironmentVariable("IOT_CERT_KEY_PATH");
+            CertPath = "test/data/roots.pem"; // Environment.GetEnvironmentVariable("IOT_CERT_KEY_PATH");
             PrivateKeyPath = privateKeyPath;
             ServiceAccount = "serviceAccount:ivdiot-service-account@ivdiot.iam.gserviceaccount.com"; //"ivdiot-service-account@ivdiot.iam.gserviceaccount.com";
-            TestId = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString();
-            TopicName = new TopicName(ProjectId, "iot-test-" + TestId);
-            RegistryId = "iot-test-" + TestId;
-            CreatePubSubTopic(this.TopicName);
+            DeviceUniqueId = Guid.NewGuid().ToString();
+            //TestId = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds().ToString();
+            //TopicName = new TopicName(ProjectId, "iot-test-" + TestId);
+            RegistryId = "immucor-device-registry";
+            //CreatePubSubTopic(this.TopicName);
             // Check if the number of registries does not exceed 90.
-            CheckRegistriesLimit(ProjectId, RegionId);
-            Assert.Equal(0, CloudIotSample.CreateRegistry(ProjectId, RegionId,
-                RegistryId, TopicName.TopicId));
+            //CheckRegistriesLimit(ProjectId, RegionId);
+            //Assert.Equal(0, CloudIotSample.CreateRegistry(ProjectId, RegionId,
+            //    RegistryId, TopicName.TopicId));
+
+            //CreatePubSubTopic(this.TopicName);
+            // Check if the number of registries does not exceed 90.
+            //CheckRegistriesLimit(ProjectId, RegionId);
+            //Assert.Equal(0, CloudIotSample.CreateRegistry(ProjectId, RegionId,
+            //    RegistryId, TopicName.TopicId));
 
 
         }
@@ -300,9 +305,6 @@ namespace GoogleCloudSamples
         }
         public void CreatePubSubTopic(TopicName topicName)
         {
-            string svcacccred = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-
-
             var publisher = PublisherServiceApiClient.Create();
 
             try
