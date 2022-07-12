@@ -78,7 +78,7 @@ namespace GoogleCloudSamples
         [Value(1, HelpText = "The region (e.g. us-central1) the registry is located in.", Required = true)]
         public string regionId { get; set; }
     }
-
+    [Verb("listDevices", HelpText = "List the devices in registry")]
     class DeviceOptions
     {
         [Value(0, HelpText = "The project containing device registry.", Required = true)]
@@ -427,6 +427,10 @@ namespace GoogleCloudSamples
 
     public class CloudIotSample
     {
+        
+
+
+
         private static readonly string s_projectId = Environment.GetEnvironmentVariable("GOOGLE_PROJECT_ID");
 
         /// <summary>
@@ -537,6 +541,7 @@ namespace GoogleCloudSamples
                 });
                 Console.WriteLine($"HTTP Enabled: {registry.HttpConfig.HttpEnabledState}");
                 Console.WriteLine($"MQTT Enabled: {registry.MqttConfig.MqttEnabledState}");
+                return registry;
             }
             catch (Google.GoogleApiException e)
             {
@@ -544,7 +549,7 @@ namespace GoogleCloudSamples
                 if (e.Error != null) return e.Error.Code;
                 return -1;
             }
-            return 0;
+            
         }
         // [END iot_get_registry]
 
@@ -697,6 +702,7 @@ namespace GoogleCloudSamples
                 Console.WriteLine($"\tConfig version: {device.Config.Version}");
                 Console.WriteLine($"\tName: {device.Name}");
                 Console.WriteLine($"\tState:{device.State}");
+                return device;
             }
             catch (Google.GoogleApiException e)
             {
@@ -704,15 +710,13 @@ namespace GoogleCloudSamples
                 if (e.Error != null) return e.Error.Code;
                 return -1;
             }
-            return 0;
+            
         }
         // [END iot_create_rsa_device]
 
         // [START iot_delete_device]
         public static object DeleteDevice(string projectId, string cloudRegion, string registryId, string deviceId)
         {
-            return 0;
-
             var cloudIot = CreateAuthorizedClient();
             // The resource name of the location associated with the key rings.
             var name = $"projects/{projectId}/locations/{cloudRegion}/registries/{registryId}/devices/{deviceId}";
@@ -750,6 +754,7 @@ namespace GoogleCloudSamples
                 Console.WriteLine($"\tLast State Time:{device.LastStateTime}");
                 Console.WriteLine($"\tName: {device.Name}");
                 Console.WriteLine($"\tState:{device.State}");
+                return device;
             }
             catch (Google.GoogleApiException e)
             {
@@ -757,7 +762,7 @@ namespace GoogleCloudSamples
                 if (e.Error != null) return e.Error.Code;
                 return -1;
             }
-            return 0;
+            
         }
         // [END iot_get_device]
 
@@ -826,13 +831,8 @@ namespace GoogleCloudSamples
             try
             {
                 var result = cloudIot.Projects.Locations.Registries.Devices.List(parent).Execute();
-                Console.WriteLine("Devices: ");
-                result.Devices.ToList().ForEach(response =>
-                {
-                    Console.WriteLine($"{response.Id}");
-                    Console.WriteLine($"\t{response.Config}");
-                    Console.WriteLine($"\t{response.Name}");
-                });
+                
+                return result.Devices;
             }
             catch (Google.GoogleApiException e)
             {
@@ -1487,7 +1487,15 @@ namespace GoogleCloudSamples
                 .Add((UnbindAllDevicesOptions opts) => UnbindAllDevices(opts.projectId,
                     opts.regionId, opts.registryId))
                 .NotParsedFunc = (err) => 1;
-            return (int)verbMap.Run(args);
+
+            object result = verbMap.Run(args);
+            if(result == null)
+                return 0;
+            if (result.CanCast<int>())
+                return (int)result;
+
+            return result.GetHashCode();
+            //return (int)verbMap.Run(args);
         }
     }
 }

@@ -24,12 +24,12 @@ using Policy = Google.Cloud.Iam.V1.Policy;
 using SetIamPolicyRequest = Google.Cloud.Iam.V1.SetIamPolicyRequest;
 using GoogleCloudSamples;
 
-namespace ImmucorRegistryTest
+namespace LDMSCloudIotTest
 {
     // <summary>
     /// Runs the sample app's methods and tests the outputs
     // </summary>
-    public class ImmucorRegistryCommonTests : IClassFixture<IotTestFixture>
+    public class LDMSCloudIotCommonTests : IClassFixture<IotTestFixture>
     {
         private readonly RetryRobot _retryRobot = new RetryRobot()
         {
@@ -37,7 +37,7 @@ namespace ImmucorRegistryTest
         };
         private readonly IotTestFixture _fixture;
 
-        public ImmucorRegistryCommonTests(IotTestFixture fixture)
+        public LDMSCloudIotCommonTests(IotTestFixture fixture)
         {
             _fixture = fixture;
         }
@@ -60,7 +60,13 @@ namespace ImmucorRegistryTest
                 _fixture.RegistryId);
             Assert.Contains("Registry:", getRegistryOutput.Stdout);
         }
-
+        [Fact]
+        public void TestListDevices()
+        {
+            var getRegistryOutput = Run("listDevices", _fixture.ProjectId, _fixture.RegionId,
+                _fixture.RegistryId);
+            Assert.Contains("Devices:", getRegistryOutput.Stdout);
+        }
         [Fact]
         public void TestCreateUnauthDevice()
         {

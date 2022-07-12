@@ -61,6 +61,14 @@ namespace GoogleCloudSamples
         }
 
         [Fact]
+        public void TestListDevices()
+        {
+            var getRegistryOutput = Run("listDevices", _fixture.ProjectId, _fixture.RegionId,
+                _fixture.RegistryId);
+            Assert.Contains("Devices:", getRegistryOutput.Stdout);
+        }
+
+        [Fact]
         public void TestCreateUnauthDevice()
         {
             var deviceId = "dotnettest-unauth-" + _fixture.TestId;

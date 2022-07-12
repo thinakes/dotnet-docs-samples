@@ -25,12 +25,12 @@ using Policy = Google.Cloud.Iam.V1.Policy;
 using SetIamPolicyRequest = Google.Cloud.Iam.V1.SetIamPolicyRequest;
 using GoogleCloudSamples;
 
-namespace ImmucorMqttTests
+namespace LDMSMqttTests
 {
     // <summary>
     /// Runs the sample app's methods and tests the outputs
     // </summary>
-    public class ImmucorMqttCommonTests : IClassFixture<IotTestFixture>
+    public class LDMSMqttCommonTests : IClassFixture<IotTestFixture>
     {
         private readonly RetryRobot _retryRobot = new RetryRobot()
         {
@@ -39,7 +39,7 @@ namespace ImmucorMqttTests
         private readonly IotTestFixture _fixture;
         private readonly ITestOutputHelper _output;
 
-        public ImmucorMqttCommonTests(IotTestFixture fixture, ITestOutputHelper helper)
+        public LDMSMqttCommonTests(IotTestFixture fixture, ITestOutputHelper helper)
         {
             _fixture = fixture;
             //for displaying unit tests output in the console.
