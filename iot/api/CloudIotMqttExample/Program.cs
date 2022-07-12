@@ -399,7 +399,7 @@ namespace GoogleCloudSamples
             // With Google Cloud IoT Core, the username field is ignored,
             // and the password field is used to transmit a JWT to authorize
             // the device.
-            DateTime iat = DateTime.Now;
+            
             var pass = CreateJwtRsa(projectId, privateKeyFile);
 
             double initialConnectIntervalMillis = 0.5;
@@ -440,7 +440,7 @@ namespace GoogleCloudSamples
                 }
 
             }
-
+            DateTime iat = DateTime.Now;
             // Publish number of messages and wait for given seconds.
             client = publishMsgsAndWait(client, messageType, deviceId,
                 numMsgs, registryId, iat, jwtExpiresMin, algorithm,

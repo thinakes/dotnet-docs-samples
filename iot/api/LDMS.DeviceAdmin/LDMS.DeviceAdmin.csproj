@@ -12,4 +12,10 @@
     <ProjectReference Include="..\CloudIotMqttExample\CloudIotMqttExample.csproj" />
     <ProjectReference Include="..\CloudIotSample\CloudIotSample.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Google.Cloud.PubSub.V1" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Cloud.PubSub.V1" Version="3.0.0" />
+  </ItemGroup>
 </Project>

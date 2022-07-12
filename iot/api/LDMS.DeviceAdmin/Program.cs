@@ -1,5 +1,6 @@
 ﻿using GoogleCloudSamples;
 using Google.Apis.CloudIot.v1.Data;
+using Google.Cloud.PubSub.V1;
 
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("");
@@ -24,16 +25,17 @@ void SelectOptions()
     Console.WriteLine($"6. Open an existing Device in Registry,'{CloudIOTApis.SelectedRegistryId}'");
     Console.WriteLine($"7. Send Command to device, '{CloudIOTApis.SelectedDeviceId}'");
     Console.WriteLine($"8. Update device,'{CloudIOTApis.SelectedDeviceId}''s config");
-    Console.WriteLine("9. Exit");
+    Console.WriteLine($"9. Pull Events,'{CloudIOTApis.SelectedDeviceId}''s config");
+    Console.WriteLine("10. Exit");
     Console.WriteLine("");
 }
 while (true)
 {
     SelectOptions();
     string? selectedOption = Console.ReadLine();
-    if (selectedOption == null)
+    if (string.IsNullOrWhiteSpace(selectedOption))
         continue;
-    if (selectedOption == "9")
+    if (selectedOption == "10")
     {
         Console.WriteLine("Goodbye!");
         break;
@@ -114,6 +116,10 @@ while (true)
         case "8":
             Console.WriteLine("8. Update device config");
             break;
+        case "9":
+            Console.WriteLine("9. Pulling events");
+            await CloudIOTApis.PullMessagesAsync();
+            break;
     }
 }
 
@@ -150,13 +156,17 @@ static class CloudIOTApis
     internal static readonly string ServiceAccount = "serviceAccount:ivdiot-service-account@ivdiot.iam.gserviceaccount.com";
     //internal static readonly string DeviceUniqueId = Guid.NewGuid().ToString();
     internal static readonly string DefaultRegionId = RegionIdUS;
-    internal static readonly string DefaultRegistryId = "immucor-device-registry";
+    internal static readonly string DefaultRegistryId = "immucor-device-registry-na";
+    internal static readonly string EventSubscriptionId = "immucor-device-events";
+
 
     internal static string SelectedRegionId = DefaultRegionId;
     internal static string SelectedRegistryId = DefaultRegistryId;
     internal static string SelectedDeviceId = "Not Selected Yet";
 
     internal static string DeviceIDToCreate = "0";
+
+
     static CloudIOTApis()
     {
         
@@ -211,5 +221,28 @@ static class CloudIOTApis
         {
             Console.WriteLine($"{objectType} is null");
         }
+    }
+
+    
+    public static async Task<int> PullMessagesAsync()
+    {
+        SubscriptionName subscriptionName = SubscriptionName.FromProjectSubscription(ProjectId, EventSubscriptionId);
+        SubscriberClient subscriber = await SubscriberClient.CreateAsync(subscriptionName);
+        // SubscriberClient runs your message handle function on multiple
+        // threads to maximize throughput.
+        int messageCount = 0;
+        Task startTask = subscriber.StartAsync((PubsubMessage message, CancellationToken cancel) =>
+        {
+            string text = System.Text.Encoding.UTF8.GetString(message.Data.ToArray());
+            Console.WriteLine($"Message {message.MessageId}: {text}");
+            Interlocked.Increment(ref messageCount);
+            return Task.FromResult(SubscriberClient.Reply.Ack);
+        });
+        // Run for 5 seconds.
+        await Task.Delay(5000);
+        await subscriber.StopAsync(CancellationToken.None);
+        // Lets make sure that the start task finished successfully after the call to stop.
+        await startTask;
+        return messageCount;
     }
 }
