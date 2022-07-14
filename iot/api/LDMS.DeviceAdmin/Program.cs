@@ -25,17 +25,19 @@ void SelectOptions()
     Console.WriteLine($"6. Open an existing Device in Registry,'{CloudIOTApis.SelectedRegistryId}'");
     Console.WriteLine($"7. Send Command to device, '{CloudIOTApis.SelectedDeviceId}'");
     Console.WriteLine($"8. Update device,'{CloudIOTApis.SelectedDeviceId}''s config");
-    Console.WriteLine($"9. Pull Events,'{CloudIOTApis.SelectedDeviceId}''s config");
-    Console.WriteLine("10. Exit");
+    Console.WriteLine($"9. Pull Events for '{CloudIOTApis.SelectedDeviceId}'");
+    Console.WriteLine($"10.Pull state of,'{CloudIOTApis.SelectedDeviceId}'");
+    Console.WriteLine("11. Exit");
     Console.WriteLine("");
 }
+
 while (true)
 {
     SelectOptions();
     string? selectedOption = Console.ReadLine();
     if (string.IsNullOrWhiteSpace(selectedOption))
         continue;
-    if (selectedOption == "10")
+    if (selectedOption == "11")
     {
         Console.WriteLine("Goodbye!");
         break;
@@ -93,9 +95,9 @@ while (true)
             if(!string.IsNullOrWhiteSpace(newdeviceId))
             {
                 CloudIOTApis.DeviceIDToCreate = newdeviceId;
+                Console.WriteLine("Creating a device");
+                CloudIOTApis.CreateDevice();
             }
-            Console.WriteLine("Creating a device");
-            CloudIOTApis.CreateDevice();
 
             break;
         case "6":
@@ -104,21 +106,41 @@ while (true)
             if(!string.IsNullOrWhiteSpace(deviceId))
             {
                 CloudIOTApis.SelectedDeviceId = deviceId;
+                Device openedDevice = CloudIOTApis.GetDevice();
+                CloudIOTApis.DumpObjectProps(typeof(Device), openedDevice);
             }
-            Device openedDevice = CloudIOTApis.GetDevice();
-            CloudIOTApis.DumpObjectProps(typeof(Device), openedDevice);
-
+            
             break;
         case "7":
-            Console.WriteLine("7. Send Command to opened device");
-
+            Console.WriteLine("Enter Command");
+            string? command = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(command))
+            {
+                CloudIOTApis.CommandToSendToDevice = command;
+                CloudIOTApis.SendCommand();
+            }
+            else
+                break;
             break;
         case "8":
-            Console.WriteLine("8. Update device config");
+            Console.WriteLine("Enter config payload");
+            string? deviceConfig = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(deviceConfig))
+            {
+                CloudIOTApis.ConfigToSendToDevice = deviceConfig;
+                CloudIOTApis.SendConfig();
+            }
+            else
+                break;
+
             break;
         case "9":
             Console.WriteLine("9. Pulling events");
-            await CloudIOTApis.PullMessagesAsync();
+            await CloudIOTApis.PullMessagesAsync(CloudIOTApis.EventSubscriptionId);
+            break;
+        case "10":
+            Console.WriteLine("10. Pulling states");
+            await CloudIOTApis.PullMessagesAsync(CloudIOTApis.DeviceStateSubcriptionId);
             break;
     }
 }
@@ -158,11 +180,15 @@ static class CloudIOTApis
     internal static readonly string DefaultRegionId = RegionIdUS;
     internal static readonly string DefaultRegistryId = "immucor-device-registry-na";
     internal static readonly string EventSubscriptionId = "immucor-device-events";
+    internal static readonly string DeviceStateSubcriptionId = "immucor-device-states";
 
 
     internal static string SelectedRegionId = DefaultRegionId;
     internal static string SelectedRegistryId = DefaultRegistryId;
-    internal static string SelectedDeviceId = "Not Selected Yet";
+    internal static string SelectedDeviceId = "immucor-replicant-0"
+        ;
+    internal static string CommandToSendToDevice = "Command From LDMS.DeviceAdmin";
+    internal static string ConfigToSendToDevice = "Config From LDMS.DeviceAdmin";
 
     internal static string DeviceIDToCreate = "0";
 
@@ -207,6 +233,15 @@ static class CloudIOTApis
         return (Device) CloudIotSample.GetDevice(ProjectId, SelectedRegionId, SelectedRegistryId, SelectedDeviceId);
     }
 
+    internal static void SendCommand()
+    {
+        CloudIotSample.SendCommand(SelectedDeviceId, ProjectId, SelectedRegionId, SelectedRegistryId, CommandToSendToDevice);
+    }
+    internal static void SendConfig()
+    {
+        CloudIotSample.SetDeviceConfig(ProjectId, SelectedRegionId, SelectedRegistryId, SelectedDeviceId, ConfigToSendToDevice);
+    }
+
     internal static void DumpObjectProps(Type objectType, object obj)
     {
         if (obj != null)
@@ -224,9 +259,9 @@ static class CloudIOTApis
     }
 
     
-    public static async Task<int> PullMessagesAsync()
+    public static async Task<int> PullMessagesAsync(string subscriptionId)
     {
-        SubscriptionName subscriptionName = SubscriptionName.FromProjectSubscription(ProjectId, EventSubscriptionId);
+        SubscriptionName subscriptionName = SubscriptionName.FromProjectSubscription(ProjectId, subscriptionId);
         SubscriberClient subscriber = await SubscriberClient.CreateAsync(subscriptionName);
         // SubscriberClient runs your message handle function on multiple
         // threads to maximize throughput.

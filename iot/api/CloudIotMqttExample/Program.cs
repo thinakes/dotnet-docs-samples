@@ -304,15 +304,17 @@ namespace GoogleCloudSamples
             MqttClient client = new MqttClient(mqttBridgeHostname, mqttBridgePort,
                 true, x509Certificate, null, mqttSslProtocols, null)
             {
+
                 ProtocolVersion = MqttProtocolVersion.Version_3_1_1
             };
 
             Console.WriteLine("Creating the client {0}", client);
             // register to message received
-            client.ConnectionClosed += Client_ConnectionClosed;
+            /*
+             * client.ConnectionClosed += Client_ConnectionClosed;
             client.MqttMsgSubscribed += Client_MqttMsgSubscribed;
             client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
-            client.MqttMsgPublished += Client_MqttMsgPublished;
+            client.MqttMsgPublished += Client_MqttMsgPublished;*/
 
             return client;
         }
