@@ -754,6 +754,7 @@ namespace GoogleCloudSamples
                 Console.WriteLine($"\tLast State Time:{device.LastStateTime}");
                 Console.WriteLine($"\tName: {device.Name}");
                 Console.WriteLine($"\tState:{device.State}");
+                
                 return device;
             }
             catch (Google.GoogleApiException e)
