@@ -5,14 +5,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Additional configuration is required to successfully run gRPC on macOS.
 // For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
 
-// Add services to the container.
+//To Display Local Web UI
+builder.Services.AddRazorPages();
+
+//Add services to the container.
 builder.Services.AddGrpc();  //  for the communication with ICS
+
+
 
 //For communication with device agent.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+
 var app = builder.Build();
 
 //// Configure the HTTP request pipeline.
@@ -26,6 +34,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
+app.MapRazorPages();
 app.Run();
